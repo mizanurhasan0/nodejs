@@ -17,4 +17,9 @@ router.post("/", ValidateToken, async (req, res) => {
   await Comments.create(comment);
   res.json(comment);
 });
+
+router.delete("/:commitId", ValidateToken, async (req, res) => {
+  const commitId = req.params.commitId;
+  await Comments.destroy({ where: { id: commitId } });
+});
 module.exports = router;

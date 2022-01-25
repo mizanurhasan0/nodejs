@@ -4,6 +4,7 @@ const { Users } = require("../models");
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 const { ValidateToken } = require("../middleware/AuthMiddleware");
+const { json } = require("express/lib/response");
 
 router.post("/", async (req, res) => {
   const { username, password } = req.body;
@@ -29,11 +30,20 @@ router.post("/login", async (req, res) => {
     } else {
       const jwt = sign({ username: user.username, id: user.id }, "hasan");
 
-      res.json(jwt);
+      res.json({ token: jwt, username: user.username, id: user.id });
     }
   });
 });
 router.get("/authCheck", ValidateToken, (req, res) => {
   res.json(req.user);
+});
+
+router.get("/profile/:id", ValidateToken, async (req, res) => {
+  const id = req.params.id;
+
+  const basicInfo = await Users.findByPk(id, {
+    attributes: { exclude: ["password"] },
+  });
+  res.json(basicInfo);
 });
 module.exports = router;
