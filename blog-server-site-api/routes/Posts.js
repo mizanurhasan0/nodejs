@@ -22,7 +22,16 @@ router.post("/", ValidateToken, async (req, res) => {
   await Posts.create(post);
   res.json(post);
 });
-
+router.put("/title", ValidateToken, async (req, res) => {
+  const { newTitle, id } = req.body;
+  await Posts.update({ title: newTitle }, { where: { id: id } });
+  res.json(newTitle);
+});
+router.put("/body", ValidateToken, async (req, res) => {
+  const { newBody, id } = req.body;
+  await Posts.update({ postText: newBody }, { where: { id: id } });
+  res.json(newBody);
+});
 router.get("/byUserId/:id", ValidateToken, async (req, res) => {
   const id = req.params.id;
   const listOfPosts = await Posts.findAll({
