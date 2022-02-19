@@ -1,25 +1,41 @@
 const express = require("express");
 const router = express.Router();
 const { User } = require("../models");
+const multer = require("multer");
+const path = require("path");
 
 const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
-const { ValidationToken } = require("../authMiddleware/AuthMiddleware");
+// const { ValidationToken } = require("../authMiddleware/AuthMiddleware");
 const { json } = require("express/lib/response");
+const { PersonalProject } = require("../models");
 
 //create User
-router.post("/", async (req, res) => {
-  const { username, password, email } = req.body;
-  bcrypt.hash(password, 10).then((hash) => {
-    User.create({
-      username: username,
-      password: hash,
-      email: email,
-    });
-    res.json("User Add Successfully");
-  });
-});
+// router.post("/", UploadImages, async (req, res) => {
+//   let hassPassword = bcrypt.hash(req.body.password, 10).then((hash) => {
+//     return hash;
+//   });
+//   let userInfo = {
+//     username: req.body.username,
+//     password: hassPassword,
+//     email: req.body.email,
+//     image: req.file.image,
+//   };
+//   const newUser = await User.create(userInfo);
+
+//   res.status(200).send(newUser);
+//   console.log(newUser);
+//   // const { username, password, email } = req.body;
+//   // bcrypt.hash(password, 10).then((hash) => {
+//   //   User.create({
+//   //     username: username,
+//   //     password: hash,
+//   //     email: email,
+//   //   });
+//   //   res.json("User Add Successfully");
+//   // });
+// });
 //End create User
 
 /// get Login
@@ -42,24 +58,37 @@ router.post("/login", async (req, res) => {
 /// End Login
 
 //Start checking auth
-router.get("/authcheck", ValidationToken, (req, res) => {
+router.get("/authcheck", (req, res) => {
   res.json(req.user);
 });
 //ENd Chaecking auth
 
 // Get Profile
-router.get("/profile/:id", ValidationToken, async (req, res) => {
+router.get("/profile/:id", async (req, res) => {
   const id = req.params.id;
 
-  const basicInfo = await User.findByPk(id, {
-    attributes: { exclude: ["password"] },
-  });
+  const basicInfo = await User.findByPk(
+    id,
+    {
+      attributes: { exclude: ["password"] },
+    },
+    { incliude: [PersonalProject] }
+  );
   res.json(basicInfo);
+});
+// End Get Profile
+// Get Profile
+router.get("/getuser", async (req, res) => {
+  const basicInfo = await User.findAll(
+    { attributes: { exclude: ["password"] } },
+    { incliude: [PersonalProject] }
+  );
+  res.json({ basicInfo: basicInfo });
 });
 // End Get Profile
 
 // Put Password
-router.put("forgetpassword", ValidationToken, async (req, res) => {
+router.put("forgetpassword", async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findOne({ where: { username: req.user.username } });
@@ -77,5 +106,47 @@ router.put("forgetpassword", ValidationToken, async (req, res) => {
     });
   });
 });
+
 // ENd Put Password
+
+const Storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const UploadImages = multer({
+  storage: Storage,
+  limits: { fileSize: "100000" },
+  fileFilter: (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|gif/;
+    const mimeType = fileTypes.test(file.mimetype);
+    const extname = fileTypes.test(path.extname(file.originalname));
+
+    if (mimeType && extname) {
+      return cb(null, true);
+    }
+    cb("Give proper files formate to upload");
+  },
+}).single("image");
+
+router.post("/", UploadImages, async (req, res) => {
+  // const {username,password,email}
+  let hashPass = bcrypt.hash(req.body.password, 10).then((hash) => {
+    let userInfo = {
+      username: req.body.username,
+      password: hash,
+      email: req.body.email,
+      image: req.file.filename,
+    };
+    const newUser = User.create(userInfo);
+
+    res.status(200).send(userInfo);
+    console.log(userInfo);
+  });
+});
+
 module.exports = router;

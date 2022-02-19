@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
+    image: {
+      type: DataTypes.STRING,
+    },
   });
 
   User.associate = (models) => {
@@ -22,6 +26,9 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "cascade",
     });
     User.hasOne(models.UserInfo, {
+      onDelete: "cascade",
+    });
+    User.hasMany(models.Education, {
       onDelete: "cascade",
     });
   };
