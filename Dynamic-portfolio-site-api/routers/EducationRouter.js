@@ -16,10 +16,10 @@ router.get("/:id", async (req, res) => {
   res.json(education);
 });
 
-router.post("/", async (req, res) => {
+router.post("/", ValidationToken, async (req, res) => {
   const education = req.body;
-  // project.UserId = req.user.id;
-  education.UserId = 1;
+  education.UserId = req.user.id;
+  // education.UserId = 1;
   console.log(education);
   await Education.create(education);
   res.json(education);

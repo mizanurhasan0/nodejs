@@ -11,38 +11,11 @@ const { sign } = require("jsonwebtoken");
 const { json } = require("express/lib/response");
 const { PersonalProject } = require("../models");
 
-//create User
-// router.post("/", UploadImages, async (req, res) => {
-//   let hassPassword = bcrypt.hash(req.body.password, 10).then((hash) => {
-//     return hash;
-//   });
-//   let userInfo = {
-//     username: req.body.username,
-//     password: hassPassword,
-//     email: req.body.email,
-//     image: req.file.image,
-//   };
-//   const newUser = await User.create(userInfo);
-
-//   res.status(200).send(newUser);
-//   console.log(newUser);
-//   // const { username, password, email } = req.body;
-//   // bcrypt.hash(password, 10).then((hash) => {
-//   //   User.create({
-//   //     username: username,
-//   //     password: hash,
-//   //     email: email,
-//   //   });
-//   //   res.json("User Add Successfully");
-//   // });
-// });
-//End create User
-
 /// get Login
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  const user = await User.findOne({ where: { username: username } });
+  const user = await User.findOne({ where: { email: email } });
 
   if (!user) res.json({ error: "User Doesn't exist" });
 
@@ -79,11 +52,10 @@ router.get("/profile/:id", async (req, res) => {
 // End Get Profile
 // Get Profile
 router.get("/getuser", async (req, res) => {
-  const basicInfo = await User.findAll(
-    { attributes: { exclude: ["password"] } },
-    { incliude: [PersonalProject] }
-  );
-  res.json({ basicInfo: basicInfo });
+  const user = await User.findByPk(1, {
+    attributes: { exclude: ["password"] },
+  });
+  res.json({ user: user });
 });
 // End Get Profile
 
@@ -134,18 +106,15 @@ const UploadImages = multer({
 }).single("image");
 
 router.post("/", UploadImages, async (req, res) => {
-  // const {username,password,email}
-  let hashPass = bcrypt.hash(req.body.password, 10).then((hash) => {
+  bcrypt.hash(req.body.password, 10).then((hash) => {
     let userInfo = {
       username: req.body.username,
       password: hash,
       email: req.body.email,
       image: req.file.filename,
     };
-    const newUser = User.create(userInfo);
-
-    res.status(200).send(userInfo);
-    console.log(userInfo);
+    User.create(userInfo);
+    res.status(200).send("Add User Successfully");
   });
 });
 

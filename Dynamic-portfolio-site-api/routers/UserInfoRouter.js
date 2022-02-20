@@ -9,7 +9,7 @@ router.post("/", async (req, res) => {
   if (!existUserInfo) {
     const userinfo = req.body;
 
-    console.log(req.body);
+    console.log(res.body);
 
     userinfo.UserId = 1;
     await UserInfo.create({
@@ -54,7 +54,7 @@ router.post("/", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
-  const usrinfo = await UserInfo.findAll();
+  const usrinfo = await UserInfo.findAll({ where: { UserId: 1 } });
   res.json(usrinfo);
 });
 router.put("/update", async (req, res) => {

@@ -22,11 +22,6 @@ app.use("/userinfo", UserInfo);
 const Education = require("./routers/EducationRouter");
 app.use("/education", Education);
 
-// const uploadImage = require("./routers/ImageRouter");
-// app.use("/image", uploadImage);
-
-const uploadImage = require("./routers/OUserRouter");
-app.use("/image", uploadImage);
 app.use("/Images", express.static("./images"));
 
 db.sequelize.sync().then(() => {
