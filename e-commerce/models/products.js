@@ -37,5 +37,11 @@ module.exports = (sequilize, DataTypes) => {
       allowNull: false,
     },
   });
+  Products.associate = (models) => {
+    Products.hasMany(models.Carts, {
+      onDelete: "cascade",
+    });
+  };
+
   return Products;
 };
