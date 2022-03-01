@@ -16,7 +16,7 @@ app.use("/cart", cartRoutes);
 
 app.use("/images", express.static("./images"));
 db.sequelize.sync().then(() => {
-  app.listen(3001, () => {
+  app.listen(process.env.PORT || 3001, () => {
     console.log("server PORT 3001 Running....");
   });
 });
